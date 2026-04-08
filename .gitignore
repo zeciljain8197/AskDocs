@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Data — raw cache and indexes are regenerable, don't commit them
+data/raw/
+data/qdrant_db/
+data/processed/bm25_index.pkl
+data/processed/bm25_chunks.json
+
+# Commit the golden dataset — it's hand-curated and version-controlled
+!data/processed/golden_dataset.json
+
+# ML model caches (downloaded automatically)
+.cache/
+models/
+*.pt
+*.bin
+*.safetensors
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Logs
+*.log
+logs/
+
+# Evaluation output (regenerated on each run)
+data/processed/eval_results.json
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Ruff cache
+.ruff_cache/
+
+# mypy
+.mypy_cache/
