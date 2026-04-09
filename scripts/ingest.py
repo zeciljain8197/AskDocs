@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import sys
 import time
 
 from loguru import logger
@@ -38,7 +39,7 @@ def run(max_pages: int | None = None, recreate: bool = False) -> None:
 
     if not documents:
         logger.error("No documents loaded — aborting. Check loader output above.")
-        return
+        sys.exit(1)
 
     # 2. Chunk
     logger.info("Step 2/5  Chunking …")

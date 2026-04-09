@@ -35,12 +35,14 @@ jobs:
           restore-keys: rag-index-
 
       - name: Build index (if cache miss)
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           if [ ! -f data/processed/bm25_index.pkl ]; then
             echo "Index not cached — running ingestion (first run only)"
-            python -m scripts.ingest --max-pages 100
+            python -m scripts.ingest --max-pages 50
+            if [ ! -f data/processed/bm25_index.pkl ]; then
+              echo "ERROR: Ingestion completed but index file not found"
+              exit 1
+            fi
           else
             echo "Index found in cache, skipping ingestion"
           fi
