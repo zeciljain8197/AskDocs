@@ -141,7 +141,7 @@ def generate_answer(query: str, chunks: list[RerankedChunk]) -> AnswerWithCitati
             answer_text = (
                 "⚠️  LLM unavailable. Check that GROQ_API_KEY is set in .env "
                 "OR that Ollama is running (ollama serve) with llama3.2 pulled.\n\n"
-                f"Retrieved context chunks are shown above with --debug."
+                "Retrieved context chunks are shown above with --debug."
             )
             model_used = "unavailable"
 

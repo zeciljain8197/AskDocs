@@ -15,7 +15,6 @@ from pathlib import Path
 import numpy as np
 from loguru import logger
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
 
 from src.config import settings
 from src.models import Chunk

@@ -12,7 +12,6 @@ the same docs produces the same IDs — essential for eval reproducibility.
 from __future__ import annotations
 
 import hashlib
-from dataclasses import replace
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from loguru import logger

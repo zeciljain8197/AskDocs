@@ -120,8 +120,6 @@ def _clean_markdown(text: str) -> str:
     """
     lines: list[str] = []
     in_frontmatter = False
-    frontmatter_done = False
-    in_jsx = False
 
     for i, line in enumerate(text.splitlines()):
         # Strip YAML frontmatter (--- ... ---)
@@ -131,7 +129,6 @@ def _clean_markdown(text: str) -> str:
         if in_frontmatter:
             if line.strip() == "---":
                 in_frontmatter = False
-                frontmatter_done = True
             continue
 
         # Skip JSX import lines and component tags
