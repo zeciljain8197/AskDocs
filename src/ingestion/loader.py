@@ -154,16 +154,23 @@ def load_langchain_docs(max_pages: int | None = MAX_PAGES) -> list[Document]:
     Download LangChain docs Markdown files from GitHub and return Documents.
     Disk-cached — subsequent runs are near-instant.
     """
+    import os
+
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": "AskDocs-RAG-Project/0.1 (educational)",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
-    )
+    headers = {
+        "User-Agent": "AskDocs-RAG-Project/0.1 (educational)",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    github_token = os.environ.get("GITHUB_TOKEN")
+    if github_token:
+        headers["Authorization"] = f"Bearer {github_token}"
+        logger.debug("Using GITHUB_TOKEN for authenticated API requests (5000 req/hr)")
+    else:
+        logger.debug("No GITHUB_TOKEN — using unauthenticated GitHub API (60 req/hr)")
+    session.headers.update(headers)
 
     logger.info(f"Listing Markdown files in github.com/{REPO}/blob/{BRANCH}/{DOCS_PATH} …")
     files = _list_md_files(DOCS_PATH, session)

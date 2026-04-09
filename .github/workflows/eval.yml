@@ -35,6 +35,8 @@ jobs:
           restore-keys: rag-index-
 
       - name: Build index (if cache miss)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ ! -f data/processed/bm25_index.pkl ]; then
             echo "Index not cached — running ingestion (first run only)"
