@@ -29,10 +29,10 @@ from src.models import Document
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 GITHUB_API = "https://api.github.com"
-REPO = "langchain-ai/docs"
-DOCS_PATH = "src/oss/python"  # Python conceptual docs only
+REPO = "langchain-ai/langchain"
+DOCS_PATH = "docs/docs"  # Python conceptual docs
 SKIP_PATHS = ["integrations/", "migrate/", "releases/"]  # exclude integration stubs
-BRANCH = "main"
+BRANCH = "master"
 CACHE_DIR = Path("data/raw/langchain_cache")
 REQUEST_DELAY = 0.5  # stay well under 60 req/hr unauthenticated
 MAX_PAGES = 300
