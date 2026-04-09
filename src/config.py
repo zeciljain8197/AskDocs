@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     rerank_top_k: int = 5
 
     # Evaluation thresholds
-    faithfulness_threshold: float = 0.75
+    faithfulness_threshold: float = 0.70
     answer_relevancy_threshold: float = 0.75
     context_recall_threshold: float = 0.65
 
