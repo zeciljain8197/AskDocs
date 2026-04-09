@@ -41,7 +41,7 @@ jobs:
         run: |
           if [ ! -f data/processed/bm25_index.pkl ]; then
             echo "Index not cached — running ingestion (first run only)"
-            python -m scripts.ingest --max-pages 50
+            python -m scripts.ingest --max-pages 150
             if [ ! -f data/processed/bm25_index.pkl ]; then
               echo "ERROR: Ingestion completed but index file not found"
               exit 1
