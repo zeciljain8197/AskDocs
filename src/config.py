@@ -55,7 +55,8 @@ class Settings(BaseSettings):
     rerank_top_k: int = 5
 
     # Evaluation thresholds
-    faithfulness_threshold: float = 0.55  # 8b judge has ±0.10 run-to-run variance; 0.55 catches real regressions
+    # 8b judge has ±0.10 run-to-run variance; 0.55 catches real regressions
+    faithfulness_threshold: float = 0.55
     answer_relevancy_threshold: float = 0.75
     context_recall_threshold: float = 0.65
 
