@@ -31,10 +31,10 @@ from src.models import Document
 
 GITHUB_API = "https://api.github.com"
 RAW_BASE = "https://raw.githubusercontent.com"
-REPO = "langchain-ai/langchain"
-DOCS_PATH = "docs/docs"  # Python conceptual docs
-SKIP_PATHS = ["integrations/", "migrate/", "releases/"]  # exclude integration stubs
-BRANCH = "master"
+REPO = "langchain-ai/docs"
+DOCS_PATH = "src/oss/python"  # Python conceptual + integration docs
+SKIP_PATHS = ["migrate/", "releases/", "TEMPLATE"]  # skip migration notes and stub templates
+BRANCH = "main"
 CACHE_DIR = Path("data/raw/langchain_cache")
 REQUEST_DELAY = 0.1  # raw.githubusercontent.com has generous limits
 MAX_PAGES = 300
@@ -98,6 +98,10 @@ def _list_md_files(session: requests.Session) -> list[dict]:
         logger.warning("Git Trees API returned no data — check REPO/BRANCH constants")
         return []
 
+    total_entries = len(data.get("tree", []))
+    logger.debug(
+        f"Git tree: {total_entries} total entries, truncated={data.get('truncated', False)}"
+    )
     if data.get("truncated"):
         logger.warning("Git tree response was truncated — some files may be missing")
 

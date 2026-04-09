@@ -31,6 +31,7 @@ jobs:
             data/qdrant_db
             data/processed/bm25_index.pkl
             data/processed/bm25_chunks.json
+            data/raw/langchain_cache
           key: rag-index-${{ hashFiles('src/ingestion/**') }}
           restore-keys: rag-index-
 
