@@ -2,6 +2,7 @@
 Central configuration — all settings loaded from .env once at import time.
 Every module imports from here; nothing reads os.environ directly.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -9,9 +10,9 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-ROOT_DIR = Path(__file__).resolve().parents[1]   # repo root
+ROOT_DIR = Path(__file__).resolve().parents[1]  # repo root
 DATA_DIR = ROOT_DIR / "data"
-RAW_DIR  = DATA_DIR / "raw"
+RAW_DIR = DATA_DIR / "raw"
 PROC_DIR = DATA_DIR / "processed"
 
 
@@ -35,10 +36,10 @@ class Settings(BaseSettings):
     # We use 8b-instant and prevent its JSON truncation issue by capping context
     # content via ragas_context_chars (keeps the statement list short).
     ragas_llm_model: str = "llama-3.1-8b-instant"
-    ragas_rerank_top_k: int = 8      # chunks retrieved+generated with (more → better recall)
-    ragas_context_limit: int = 5     # number of contexts passed to RAGAS scoring
-    ragas_context_chars: int = 400   # max chars per context chunk sent to RAGAS
-    ragas_inter_sample_delay: float = 1.0   # seconds between samples (TPM throttle)
+    ragas_rerank_top_k: int = 8  # chunks retrieved+generated with (more → better recall)
+    ragas_context_limit: int = 5  # number of contexts passed to RAGAS scoring
+    ragas_context_chars: int = 400  # max chars per context chunk sent to RAGAS
+    ragas_inter_sample_delay: float = 1.0  # seconds between samples (TPM throttle)
 
     # Embeddings
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"

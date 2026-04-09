@@ -1,6 +1,7 @@
 """
 Unit tests — these run on every CI push and don't require a live LLM.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -12,20 +13,21 @@ from src.retrieval.hybrid_retriever import reciprocal_rank_fusion
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def sample_documents() -> list[Document]:
     return [
         Document(
             content="LangChain Expression Language (LCEL) is a declarative way to compose LLM chains.\n\n"
-                    "It supports streaming, async execution, and parallel branching.\n\n"
-                    "You can build a chain with: chain = prompt | llm | parser",
+            "It supports streaming, async execution, and parallel branching.\n\n"
+            "You can build a chain with: chain = prompt | llm | parser",
             source="https://python.langchain.com/docs/expression_language",
             title="LCEL Overview",
         ),
         Document(
             content="Retrievers in LangChain implement the BaseRetriever interface.\n\n"
-                    "They expose a get_relevant_documents() method that returns a list of Documents.\n\n"
-                    "Vector stores can be converted to retrievers with .as_retriever().",
+            "They expose a get_relevant_documents() method that returns a list of Documents.\n\n"
+            "Vector stores can be converted to retrievers with .as_retriever().",
             source="https://python.langchain.com/docs/retrievers",
             title="Retrievers",
         ),
@@ -38,6 +40,7 @@ def sample_chunks(sample_documents) -> list[Chunk]:
 
 
 # ── Chunker tests ─────────────────────────────────────────────────────────────
+
 
 class TestChunker:
     def test_produces_chunks(self, sample_documents):
@@ -74,6 +77,7 @@ class TestChunker:
 
 
 # ── RRF tests ─────────────────────────────────────────────────────────────────
+
 
 class TestRRF:
     def _make_scored_chunks(self, ids: list[str]) -> list[ScoredChunk]:

@@ -10,6 +10,7 @@ Why Qdrant?
 Schema stored in each point payload:
   { chunk_id, content, source, title, char_start, char_end, metadata }
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -78,16 +79,16 @@ def upsert_chunks(chunks: list[Chunk], batch_size: int = 256) -> None:
     for chunk in valid:
         points.append(
             PointStruct(
-                id=int(chunk.chunk_id, 16) % (2**63),   # Qdrant needs uint64
+                id=int(chunk.chunk_id, 16) % (2**63),  # Qdrant needs uint64
                 vector=chunk.embedding,
                 payload={
-                    "chunk_id":   chunk.chunk_id,
-                    "content":    chunk.content,
-                    "source":     chunk.source,
-                    "title":      chunk.title,
+                    "chunk_id": chunk.chunk_id,
+                    "content": chunk.content,
+                    "source": chunk.source,
+                    "title": chunk.title,
                     "char_start": chunk.char_start,
-                    "char_end":   chunk.char_end,
-                    "metadata":   chunk.metadata,
+                    "char_end": chunk.char_end,
+                    "metadata": chunk.metadata,
                 },
             )
         )
@@ -96,7 +97,7 @@ def upsert_chunks(chunks: list[Chunk], batch_size: int = 256) -> None:
     for i in range(0, len(points), batch_size):
         batch = points[i : i + batch_size]
         client.upsert(collection_name=settings.qdrant_collection, points=batch)
-        logger.debug(f"Upserted batch {i//batch_size + 1} ({len(batch)} points)")
+        logger.debug(f"Upserted batch {i // batch_size + 1} ({len(batch)} points)")
 
     logger.success(f"Upserted {len(valid)} chunks into Qdrant")
 

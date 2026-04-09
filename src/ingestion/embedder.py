@@ -8,6 +8,7 @@ Model: all-MiniLM-L6-v2
 
 Batching: processes chunks in configurable batch sizes to stay within RAM.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -43,7 +44,7 @@ def embed_texts(texts: list[str], batch_size: int = 64, show_progress: bool = Tr
         texts,
         batch_size=batch_size,
         show_progress_bar=show_progress,
-        normalize_embeddings=True,   # cosine sim == dot product when normalized
+        normalize_embeddings=True,  # cosine sim == dot product when normalized
         convert_to_numpy=True,
     )
     return embeddings.astype(np.float32)

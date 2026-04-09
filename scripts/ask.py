@@ -7,6 +7,7 @@ Usage:
     python -m scripts.ask --expand        # use multi-query expansion
     python -m scripts.ask --debug         # show retrieval details
 """
+
 from __future__ import annotations
 
 import argparse
@@ -25,9 +26,9 @@ from src.config import settings
 
 
 def ask(query: str, use_hyde: bool = False, use_expand: bool = False, debug: bool = False):
-    print(f"\n{'─'*60}")
+    print(f"\n{'─' * 60}")
     print(f"Q: {query}")
-    print(f"{'─'*60}")
+    print(f"{'─' * 60}")
 
     # --- Retrieval with optional expansion ---
     if use_expand:
@@ -38,15 +39,15 @@ def ask(query: str, use_hyde: bool = False, use_expand: bool = False, debug: boo
             all_bm25 += bm25_search(q, top_k=settings.bm25_top_k)
             qvec = hyde_embed(q) if use_hyde else embed_query(q)
             all_vec += vector_search(qvec, top_k=settings.vector_top_k)
-        fused   = reciprocal_rank_fusion(all_bm25, all_vec)
-        chunks  = rerank(query, candidates=fused, top_k=settings.rerank_top_k)
+        fused = reciprocal_rank_fusion(all_bm25, all_vec)
+        chunks = rerank(query, candidates=fused, top_k=settings.rerank_top_k)
     elif use_hyde:
         print("[Using HyDE embedding]")
-        qvec    = hyde_embed(query)
-        bm25_r  = bm25_search(query, top_k=settings.bm25_top_k)
-        vec_r   = vector_search(qvec, top_k=settings.vector_top_k)
-        fused   = reciprocal_rank_fusion(bm25_r, vec_r)
-        chunks  = rerank(query, candidates=fused, top_k=settings.rerank_top_k)
+        qvec = hyde_embed(query)
+        bm25_r = bm25_search(query, top_k=settings.bm25_top_k)
+        vec_r = vector_search(qvec, top_k=settings.vector_top_k)
+        fused = reciprocal_rank_fusion(bm25_r, vec_r)
+        chunks = rerank(query, candidates=fused, top_k=settings.rerank_top_k)
     else:
         chunks = retrieve(query)
 
@@ -70,9 +71,9 @@ def ask(query: str, use_hyde: bool = False, use_expand: bool = False, debug: boo
 
 def main():
     parser = argparse.ArgumentParser(description="Ask AskDocs a question")
-    parser.add_argument("--hyde",   action="store_true", help="Use HyDE query expansion")
+    parser.add_argument("--hyde", action="store_true", help="Use HyDE query expansion")
     parser.add_argument("--expand", action="store_true", help="Use multi-query expansion")
-    parser.add_argument("--debug",  action="store_true", help="Show retrieval debug info")
+    parser.add_argument("--debug", action="store_true", help="Show retrieval debug info")
     args = parser.parse_args()
 
     print("AskDocs — LangChain documentation assistant")

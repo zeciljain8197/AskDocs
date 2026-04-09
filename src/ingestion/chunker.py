@@ -9,6 +9,7 @@ Why recursive?
 Chunk IDs are deterministic (sha256 of source + char offset) so re-ingesting
 the same docs produces the same IDs — essential for eval reproducibility.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -20,9 +21,9 @@ from src.models import Chunk, Document
 
 
 # ── Defaults (proven good for technical documentation) ────────────────────────
-DEFAULT_CHUNK_SIZE    = 512    # tokens ≈ chars/4; sweet spot for retrieval
-DEFAULT_CHUNK_OVERLAP = 64     # ~12% overlap to preserve cross-boundary context
-DEFAULT_SEPARATORS    = ["\n\n", "\n", ". ", " ", ""]
+DEFAULT_CHUNK_SIZE = 512  # tokens ≈ chars/4; sweet spot for retrieval
+DEFAULT_CHUNK_OVERLAP = 64  # ~12% overlap to preserve cross-boundary context
+DEFAULT_SEPARATORS = ["\n\n", "\n", ". ", " ", ""]
 
 
 def _chunk_id(source: str, char_start: int) -> str:
@@ -32,7 +33,7 @@ def _chunk_id(source: str, char_start: int) -> str:
 
 def chunk_documents(
     documents: list[Document],
-    chunk_size: int    = DEFAULT_CHUNK_SIZE,
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> list[Chunk]:
     """
@@ -63,9 +64,9 @@ def chunk_documents(
             # Find true char_start by scanning forward from cursor
             char_start = doc.content.find(text[:50], char_cursor)
             if char_start == -1:
-                char_start = char_cursor   # fallback
+                char_start = char_cursor  # fallback
             char_end = char_start + len(text)
-            char_cursor = max(char_cursor, char_start)   # don't go backwards
+            char_cursor = max(char_cursor, char_start)  # don't go backwards
 
             chunk = Chunk(
                 chunk_id=_chunk_id(doc.source, char_start),

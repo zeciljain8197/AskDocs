@@ -13,6 +13,7 @@ Source: https://github.com/langchain-ai/langchain/tree/master/docs/docs
 We use the GitHub Contents API (no auth needed for public repos, 60 req/hr limit)
 with disk caching so repeated runs are instant and we stay well within rate limits.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -27,17 +28,18 @@ from src.models import Document
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-GITHUB_API   = "https://api.github.com"
-REPO         = "langchain-ai/docs"
-DOCS_PATH    = "src/oss/python"   # Python conceptual docs only
-SKIP_PATHS   = ["integrations/", "migrate/", "releases/"]  # exclude integration stubs
-BRANCH       = "main"
-CACHE_DIR    = Path("data/raw/langchain_cache")
-REQUEST_DELAY = 0.5                 # stay well under 60 req/hr unauthenticated
-MAX_PAGES    = 300
+GITHUB_API = "https://api.github.com"
+REPO = "langchain-ai/docs"
+DOCS_PATH = "src/oss/python"  # Python conceptual docs only
+SKIP_PATHS = ["integrations/", "migrate/", "releases/"]  # exclude integration stubs
+BRANCH = "main"
+CACHE_DIR = Path("data/raw/langchain_cache")
+REQUEST_DELAY = 0.5  # stay well under 60 req/hr unauthenticated
+MAX_PAGES = 300
 
 
 # ── GitHub API helpers ────────────────────────────────────────────────────────
+
 
 def _cache_path(key: str) -> Path:
     h = hashlib.md5(key.encode()).hexdigest()
@@ -92,7 +94,7 @@ def _list_md_files(
     if depth > 6:
         return []
 
-    url  = f"{GITHUB_API}/repos/{REPO}/contents/{path}?ref={BRANCH}"
+    url = f"{GITHUB_API}/repos/{REPO}/contents/{path}?ref={BRANCH}"
     data = _fetch_json(url, session)
     if not data or not isinstance(data, list):
         return []
@@ -112,6 +114,7 @@ def _list_md_files(
 
 
 # ── Markdown cleaning ─────────────────────────────────────────────────────────
+
 
 def _clean_markdown(text: str) -> str:
     """
@@ -145,6 +148,7 @@ def _clean_markdown(text: str) -> str:
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
+
 def load_langchain_docs(max_pages: int | None = MAX_PAGES) -> list[Document]:
     """
     Download LangChain docs Markdown files from GitHub and return Documents.
@@ -153,11 +157,13 @@ def load_langchain_docs(max_pages: int | None = MAX_PAGES) -> list[Document]:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     session = requests.Session()
-    session.headers.update({
-        "User-Agent":  "AskDocs-RAG-Project/0.1 (educational)",
-        "Accept":      "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-    })
+    session.headers.update(
+        {
+            "User-Agent": "AskDocs-RAG-Project/0.1 (educational)",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+    )
 
     logger.info(f"Listing Markdown files in github.com/{REPO}/blob/{BRANCH}/{DOCS_PATH} …")
     files = _list_md_files(DOCS_PATH, session)
@@ -194,7 +200,9 @@ def load_langchain_docs(max_pages: int | None = MAX_PAGES) -> list[Document]:
             continue
 
         # Title: first H1 heading, or filename
-        title = item["name"].replace(".mdx", "").replace(".md", "").replace("-", " ").replace("_", " ")
+        title = (
+            item["name"].replace(".mdx", "").replace(".md", "").replace("-", " ").replace("_", " ")
+        )
         for line in content.splitlines():
             if line.startswith("# "):
                 title = line[2:].strip()
@@ -206,7 +214,7 @@ def load_langchain_docs(max_pages: int | None = MAX_PAGES) -> list[Document]:
         documents.append(Document(content=content, source=source, title=title))
 
         if (i + 1) % 10 == 0:
-            logger.info(f"  {i+1}/{len(files)} files loaded …")
+            logger.info(f"  {i + 1}/{len(files)} files loaded …")
 
     logger.success(f"Loaded {len(documents)} documents from LangChain GitHub docs")
     return documents

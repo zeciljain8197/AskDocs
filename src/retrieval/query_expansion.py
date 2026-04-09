@@ -17,6 +17,7 @@ Why it works:
 We also support multi-query expansion: generate N paraphrase variants,
 retrieve for each, then union the results before RRF fusion.
 """
+
 from __future__ import annotations
 
 from groq import Groq

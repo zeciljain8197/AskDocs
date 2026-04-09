@@ -9,6 +9,7 @@ Endpoints:
 Run with:
     uvicorn src.api:app --reload --port 8000
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException

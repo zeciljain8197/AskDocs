@@ -12,6 +12,7 @@ Strengths:
 We persist the index + chunk list to disk so ingestion doesn't re-run
 on every startup.
 """
+
 from __future__ import annotations
 
 import json
@@ -26,11 +27,12 @@ from src.models import Chunk, ScoredChunk
 
 
 INDEX_DIR = Path("data/processed")
-BM25_PATH   = INDEX_DIR / "bm25_index.pkl"
+BM25_PATH = INDEX_DIR / "bm25_index.pkl"
 CHUNKS_PATH = INDEX_DIR / "bm25_chunks.json"
 
 
 # ── Tokenization ──────────────────────────────────────────────────────────────
+
 
 def _tokenize(text: str) -> list[str]:
     """
@@ -45,14 +47,14 @@ def _tokenize(text: str) -> list[str]:
 
 # ── Build & persist ───────────────────────────────────────────────────────────
 
+
 def build_bm25_index(chunks: list[Chunk]) -> BM25Okapi:
     """
     Build a BM25 index from chunks and save to disk.
     """
     if not chunks:
         raise ValueError(
-            "Cannot build BM25 index: 0 chunks loaded. "
-            "Check loader logs above for the root cause."
+            "Cannot build BM25 index: 0 chunks loaded. Check loader logs above for the root cause."
         )
     INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -66,12 +68,12 @@ def build_bm25_index(chunks: list[Chunk]) -> BM25Okapi:
     # Save chunk metadata (no embeddings — saves space)
     chunk_data = [
         {
-            "chunk_id":   c.chunk_id,
-            "content":    c.content,
-            "source":     c.source,
-            "title":      c.title,
+            "chunk_id": c.chunk_id,
+            "content": c.content,
+            "source": c.source,
+            "title": c.title,
             "char_start": c.char_start,
-            "char_end":   c.char_end,
+            "char_end": c.char_end,
         }
         for c in chunks
     ]
@@ -85,9 +87,7 @@ def build_bm25_index(chunks: list[Chunk]) -> BM25Okapi:
 def load_bm25_index() -> tuple[BM25Okapi, list[Chunk]]:
     """Load BM25 index and chunks from disk."""
     if not BM25_PATH.exists() or not CHUNKS_PATH.exists():
-        raise FileNotFoundError(
-            "BM25 index not found. Run the ingestion pipeline first."
-        )
+        raise FileNotFoundError("BM25 index not found. Run the ingestion pipeline first.")
 
     with open(BM25_PATH, "rb") as f:
         index = pickle.load(f)
@@ -130,12 +130,10 @@ def bm25_search(query: str, top_k: int = 20) -> list[ScoredChunk]:
     scores = index.get_scores(tokens)
 
     # Pair (score, chunk) and sort descending
-    paired = sorted(
-        zip(scores, chunks), key=lambda x: x[0], reverse=True
-    )[:top_k]
+    paired = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)[:top_k]
 
     return [
         ScoredChunk(chunk=chunk, score=float(score), retrieval_method="bm25")
         for score, chunk in paired
-        if score > 0   # filter zero-score results
+        if score > 0  # filter zero-score results
     ]

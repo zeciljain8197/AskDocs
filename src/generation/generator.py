@@ -10,6 +10,7 @@ Citation format:
   Retrieved chunks are numbered [1], [2] … in the prompt.
   The LLM cites them inline; we parse and return structured Citation objects.
 """
+
 from __future__ import annotations
 
 import re
@@ -33,8 +34,7 @@ def _build_context_block(chunks: list[RerankedChunk]) -> str:
     lines: list[str] = []
     for i, rc in enumerate(chunks, start=1):
         lines.append(
-            f"[{i}] Source: {rc.chunk.title} ({rc.chunk.source})\n"
-            f"{rc.chunk.content.strip()}"
+            f"[{i}] Source: {rc.chunk.title} ({rc.chunk.source})\n{rc.chunk.content.strip()}"
         )
     return "\n\n---\n\n".join(lines)
 
@@ -45,6 +45,7 @@ def _build_user_message(query: str, context: str) -> str:
 
 # ── Citation parsing ──────────────────────────────────────────────────────────
 
+
 def _parse_citations(answer: str, chunks: list[RerankedChunk]) -> list[Citation]:
     indices = set(int(m) for m in re.findall(r"\[(\d+)\]", answer))
     citations: list[Citation] = []
@@ -52,26 +53,30 @@ def _parse_citations(answer: str, chunks: list[RerankedChunk]) -> list[Citation]
         pos = idx - 1
         if 0 <= pos < len(chunks):
             rc = chunks[pos]
-            citations.append(Citation(
-                index=idx,
-                chunk_id=rc.chunk.chunk_id,
-                source=rc.chunk.source,
-                title=rc.chunk.title,
-                excerpt=rc.chunk.content[:120].strip() + " …",
-            ))
+            citations.append(
+                Citation(
+                    index=idx,
+                    chunk_id=rc.chunk.chunk_id,
+                    source=rc.chunk.source,
+                    title=rc.chunk.title,
+                    excerpt=rc.chunk.content[:120].strip() + " …",
+                )
+            )
     return citations
 
 
 # ── Groq backend ──────────────────────────────────────────────────────────────
 
+
 def _call_groq(system: str, user: str) -> str:
     from groq import Groq
+
     client = Groq(api_key=settings.groq_api_key)
     response = client.chat.completions.create(
         model=settings.llm_model,
         messages=[
             {"role": "system", "content": system},
-            {"role": "user",   "content": user},
+            {"role": "user", "content": user},
         ],
         temperature=settings.llm_temperature,
         max_tokens=settings.max_tokens,
@@ -81,17 +86,18 @@ def _call_groq(system: str, user: str) -> str:
 
 # ── Ollama backend (local fallback) ───────────────────────────────────────────
 
-OLLAMA_MODEL = "llama3.2"   # pull with: ollama pull llama3.2
+OLLAMA_MODEL = "llama3.2"  # pull with: ollama pull llama3.2
 
 
 def _call_ollama(system: str, user: str) -> str:
     import requests as req
+
     payload = {
-        "model":  OLLAMA_MODEL,
+        "model": OLLAMA_MODEL,
         "stream": False,
         "messages": [
-            {"role": "system",  "content": system},
-            {"role": "user",    "content": user},
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
         ],
     }
     resp = req.post("http://localhost:11434/api/chat", json=payload, timeout=120)
@@ -100,6 +106,7 @@ def _call_ollama(system: str, user: str) -> str:
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
+
 
 def generate_answer(query: str, chunks: list[RerankedChunk]) -> AnswerWithCitations:
     """
@@ -114,18 +121,18 @@ def generate_answer(query: str, chunks: list[RerankedChunk]) -> AnswerWithCitati
             model="none",
         )
 
-    context  = _build_context_block(chunks)
+    context = _build_context_block(chunks)
     user_msg = _build_user_message(query, context)
     logger.debug(f"Calling LLM with {len(chunks)} context chunks")
 
     answer_text = ""
-    model_used  = ""
+    model_used = ""
 
     # Try Groq first
     if settings.groq_api_key:
         try:
             answer_text = _call_groq(SYSTEM_PROMPT, user_msg)
-            model_used  = settings.llm_model
+            model_used = settings.llm_model
             logger.debug(f"Groq answered ({len(answer_text)} chars)")
         except Exception as exc:
             logger.warning(f"Groq failed: {exc} — trying Ollama …")
@@ -134,7 +141,7 @@ def generate_answer(query: str, chunks: list[RerankedChunk]) -> AnswerWithCitati
     if not answer_text:
         try:
             answer_text = _call_ollama(SYSTEM_PROMPT, user_msg)
-            model_used  = f"ollama/{OLLAMA_MODEL}"
+            model_used = f"ollama/{OLLAMA_MODEL}"
             logger.debug(f"Ollama answered ({len(answer_text)} chars)")
         except Exception as exc:
             logger.error(f"Ollama also failed: {exc}")

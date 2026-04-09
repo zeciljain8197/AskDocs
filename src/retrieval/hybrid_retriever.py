@@ -16,6 +16,7 @@ Why cross-encoder reranking?
   fine-grained relevance scoring at the cost of latency.
   We only rerank the top ~40 fused results, keeping it fast.
 """
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -32,7 +33,7 @@ from src.retrieval.bm25_retriever import bm25_search
 
 # ── Reciprocal Rank Fusion ────────────────────────────────────────────────────
 
-RRF_K = 60   # standard constant
+RRF_K = 60  # standard constant
 
 
 def reciprocal_rank_fusion(
@@ -43,13 +44,13 @@ def reciprocal_rank_fusion(
     Deduplicates by chunk_id, taking the highest-content chunk on collision.
     """
     rrf_scores: dict[str, float] = defaultdict(float)
-    chunk_map:  dict[str, Chunk] = {}
+    chunk_map: dict[str, Chunk] = {}
 
     for ranked in ranked_lists:
         for rank, scored in enumerate(ranked, start=1):
             cid = scored.chunk.chunk_id
             rrf_scores[cid] += 1.0 / (RRF_K + rank)
-            chunk_map[cid] = scored.chunk   # last write wins (same chunk anyway)
+            chunk_map[cid] = scored.chunk  # last write wins (same chunk anyway)
 
     merged = [
         ScoredChunk(
@@ -96,7 +97,7 @@ def rerank(query: str, candidates: list[ScoredChunk], top_k: int) -> list[Rerank
         {"text": query, "text_pair": c.chunk.content[:512]}  # model max 512 tokens
         for c in candidates
     ]
-    scores = reranker(pairs)   # list of {"label": ..., "score": float}
+    scores = reranker(pairs)  # list of {"label": ..., "score": float}
 
     reranked = sorted(
         [
@@ -116,9 +117,10 @@ def rerank(query: str, candidates: list[ScoredChunk], top_k: int) -> list[Rerank
 
 # ── Main entry point ──────────────────────────────────────────────────────────
 
+
 def retrieve(
     query: str,
-    bm25_k: int   = None,
+    bm25_k: int = None,
     vector_k: int = None,
     rerank_k: int = None,
 ) -> list[RerankedChunk]:
@@ -134,7 +136,7 @@ def retrieve(
     Returns:
         List of RerankedChunk, best first.
     """
-    bm25_k   = bm25_k   or settings.bm25_top_k
+    bm25_k = bm25_k or settings.bm25_top_k
     vector_k = vector_k or settings.vector_top_k
     rerank_k = rerank_k or settings.rerank_top_k
 

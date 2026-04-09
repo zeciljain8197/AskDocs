@@ -13,6 +13,7 @@ Usage:
     python -m scripts.ingest
     python -m scripts.ingest --max-pages 50   # quick smoke test
 """
+
 from __future__ import annotations
 
 import argparse
@@ -44,7 +45,7 @@ def run(max_pages: int | None = None, recreate: bool = False) -> None:
     # 2. Chunk
     logger.info("Step 2/5  Chunking …")
     chunks = chunk_documents(documents)
-    stats  = chunk_stats(chunks)
+    stats = chunk_stats(chunks)
     logger.info(f"  Chunk stats: {stats}")
 
     # 3. Embed
@@ -70,7 +71,7 @@ def run(max_pages: int | None = None, recreate: bool = False) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the AskDocs ingestion pipeline")
     parser.add_argument("--max-pages", type=int, default=None, help="Cap pages (for testing)")
-    parser.add_argument("--recreate",  action="store_true",    help="Recreate Qdrant collection")
+    parser.add_argument("--recreate", action="store_true", help="Recreate Qdrant collection")
     args = parser.parse_args()
 
     run(max_pages=args.max_pages, recreate=args.recreate)

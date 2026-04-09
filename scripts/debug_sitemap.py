@@ -2,18 +2,21 @@
 Debug script — confirms GitHub API access is working.
 Usage: python -m scripts.debug_sitemap
 """
+
 import requests
 
 GITHUB_API = "https://api.github.com"
-REPO       = "langchain-ai/docs"
-DOCS_PATH  = "src/oss"
-BRANCH     = "main"
+REPO = "langchain-ai/docs"
+DOCS_PATH = "src/oss"
+BRANCH = "main"
 
 session = requests.Session()
-session.headers.update({
-    "User-Agent": "AskDocs-RAG-Project/0.1 (educational)",
-    "Accept":     "application/vnd.github+json",
-})
+session.headers.update(
+    {
+        "User-Agent": "AskDocs-RAG-Project/0.1 (educational)",
+        "Accept": "application/vnd.github+json",
+    }
+)
 
 url = f"{GITHUB_API}/repos/{REPO}/contents/{DOCS_PATH}?ref={BRANCH}"
 print(f"Fetching: {url}\n")
@@ -29,7 +32,7 @@ if resp.status_code == 200:
     for item in items[:10]:
         print(f"  [{item['type']:4s}] {item['name']}")
     if len(items) > 10:
-        print(f"  ... and {len(items)-10} more")
+        print(f"  ... and {len(items) - 10} more")
     print("\nGitHub API is working correctly.")
 elif resp.status_code == 403:
     print("\nRate limited. Check x-ratelimit-reset (Unix timestamp) above.")
