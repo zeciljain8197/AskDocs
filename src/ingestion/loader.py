@@ -10,8 +10,9 @@ Why GitHub instead of scraping the website?
 Source: https://github.com/langchain-ai/langchain/tree/master/docs/docs
   ~400 .mdx / .md files covering concepts, how-tos, integrations, and API guides.
 
-We use the GitHub Contents API (no auth needed for public repos, 60 req/hr limit)
-with disk caching so repeated runs are instant and we stay well within rate limits.
+We use the Git Trees API (recursive=1) to list files — this handles large repos that
+exceed GitHub's Contents API directory limit. Raw file content is fetched from
+raw.githubusercontent.com (no rate limit, no auth needed).
 """
 
 from __future__ import annotations
@@ -29,12 +30,13 @@ from src.models import Document
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 GITHUB_API = "https://api.github.com"
+RAW_BASE = "https://raw.githubusercontent.com"
 REPO = "langchain-ai/langchain"
 DOCS_PATH = "docs/docs"  # Python conceptual docs
 SKIP_PATHS = ["integrations/", "migrate/", "releases/"]  # exclude integration stubs
 BRANCH = "master"
 CACHE_DIR = Path("data/raw/langchain_cache")
-REQUEST_DELAY = 0.5  # stay well under 60 req/hr unauthenticated
+REQUEST_DELAY = 0.1  # raw.githubusercontent.com has generous limits
 MAX_PAGES = 300
 
 
@@ -82,33 +84,42 @@ def _fetch_text(url: str, session: requests.Session) -> str | None:
         return None
 
 
-def _list_md_files(
-    path: str,
-    session: requests.Session,
-    depth: int = 0,
-) -> list[dict]:
+def _list_md_files(session: requests.Session) -> list[dict]:
     """
-    Recursively list all .md / .mdx files under a GitHub repo path.
-    Returns list of GitHub tree items: {name, path, download_url, ...}
-    """
-    if depth > 6:
-        return []
+    List all .md / .mdx files under DOCS_PATH using the Git Trees API.
 
-    url = f"{GITHUB_API}/repos/{REPO}/contents/{path}?ref={BRANCH}"
+    The Contents API returns 404 for directories with >1000 files.
+    The Trees API (?recursive=1) returns the full tree in one call regardless of size.
+    Raw file content is then fetched from raw.githubusercontent.com (no rate limit).
+    """
+    url = f"{GITHUB_API}/repos/{REPO}/git/trees/{BRANCH}?recursive=1"
     data = _fetch_json(url, session)
-    if not data or not isinstance(data, list):
+    if not data or "tree" not in data:
+        logger.warning("Git Trees API returned no data — check REPO/BRANCH constants")
         return []
 
+    if data.get("truncated"):
+        logger.warning("Git tree response was truncated — some files may be missing")
+
+    prefix = DOCS_PATH + "/"
     files: list[dict] = []
-    for item in data:
-        item_path = item.get("path", "")
-        # Skip integration stubs, migration notes, and changelogs
-        if any(skip in item_path for skip in SKIP_PATHS):
+    for item in data["tree"]:
+        if item.get("type") != "blob":
             continue
-        if item.get("type") == "file" and item["name"].endswith((".md", ".mdx")):
-            files.append(item)
-        elif item.get("type") == "dir":
-            files.extend(_list_md_files(item["path"], session, depth + 1))
+        path = item["path"]
+        if not path.startswith(prefix):
+            continue
+        if not (path.endswith(".md") or path.endswith(".mdx")):
+            continue
+        if any(skip in path for skip in SKIP_PATHS):
+            continue
+        files.append(
+            {
+                "path": path,
+                "name": path.rsplit("/", 1)[-1],
+                "download_url": f"{RAW_BASE}/{REPO}/{BRANCH}/{path}",
+            }
+        )
 
     return files
 
@@ -173,7 +184,7 @@ def load_langchain_docs(max_pages: int | None = MAX_PAGES) -> list[Document]:
     session.headers.update(headers)
 
     logger.info(f"Listing Markdown files in github.com/{REPO}/blob/{BRANCH}/{DOCS_PATH} …")
-    files = _list_md_files(DOCS_PATH, session)
+    files = _list_md_files(session)
 
     if not files:
         logger.error(
