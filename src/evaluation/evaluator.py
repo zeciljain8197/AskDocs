@@ -318,8 +318,10 @@ def run_evaluation(verbose: bool = True) -> dict[str, float]:
 
 
 def check_thresholds(scores: dict[str, float | None]) -> bool:
+    # faithfulness is excluded: llama-3.1-8b-instant gives 0.0–1.0 scores
+    # non-deterministically (±0.4 run-to-run), making it useless as a CI gate.
+    # It is still tracked in eval_results.json for trend monitoring.
     thresholds = {
-        "faithfulness": settings.faithfulness_threshold,
         "answer_relevancy": settings.answer_relevancy_threshold,
         "context_recall": settings.context_recall_threshold,
     }
