@@ -5,7 +5,30 @@
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A production-grade Retrieval-Augmented Generation (RAG) system that answers questions over LangChain documentation. Combines BM25 sparse search with dense vector search, fuses them via Reciprocal Rank Fusion, and reranks results with a cross-encoder — all gated by an automated RAGAS evaluation pipeline on every commit.
+Ask questions about LangChain documentation and get precise, cited answers — not a list of links.
+
+**[Live demo →](https://huggingface.co/spaces/zeciljain8197/askdocs)**
+
+---
+
+## Why I built this
+
+Most RAG tutorials stop at "embed documents, do cosine similarity, stuff into prompt". That approach fails on real documentation because:
+
+- Keyword queries ("LCEL syntax") beat embeddings for exact terms — pure vector search misses them
+- Embedding similarity returns *related* chunks, not necessarily the *most relevant* ones
+- Generated answers with no source links can't be verified or trusted
+
+This project addresses all three. It uses **hybrid retrieval** (BM25 + dense vectors fused via RRF) so neither sparse nor semantic signals are thrown away, **cross-encoder reranking** for a second-pass precision boost, and **inline citations** so every claim links back to a specific source page. A RAGAS evaluation pipeline runs on every commit and blocks merges if quality drops — treating RAG quality like a test suite.
+
+---
+
+## How it works (plain English)
+
+1. **Ingest** — ~300 LangChain doc pages are fetched from GitHub, split into 512-char chunks, embedded locally, and stored in Qdrant (vector) + BM25 (keyword) indexes
+2. **Retrieve** — your question hits both indexes in parallel; the 20 results from each are fused via Reciprocal Rank Fusion, then a cross-encoder re-scores the top candidates to surface the most relevant 8 chunks
+3. **Generate** — those 8 chunks are sent to Groq LLaMA 3.1 8B with a prompt that requires inline citations; the model returns an answer like "LCEL is X [1]. It supports Y [2]." with each number mapping to a source chunk
+4. **Evaluate** — on every commit, RAGAS scores Answer Relevancy and Context Recall against a 10-sample golden dataset; CI fails if either metric drops below threshold
 
 ---
 

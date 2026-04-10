@@ -50,6 +50,9 @@ dependencies = [
     # API / serving
     "fastapi>=0.111",
     "uvicorn[standard]>=0.29",
+
+    # UI (Gradio — used by app.py for HuggingFace Spaces)
+    "gradio>=4.44",
 ]
 
 [project.optional-dependencies]
