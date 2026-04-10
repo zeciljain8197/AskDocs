@@ -69,19 +69,29 @@ def _parse_citations(answer: str, chunks: list[RerankedChunk]) -> list[Citation]
 
 
 def _call_groq(system: str, user: str) -> str:
+    import time
     from groq import Groq
 
     client = Groq(api_key=settings.groq_api_key)
-    response = client.chat.completions.create(
-        model=settings.llm_model,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        temperature=settings.llm_temperature,
-        max_tokens=settings.max_tokens,
-    )
-    return response.choices[0].message.content.strip()
+    for attempt in range(4):
+        try:
+            response = client.chat.completions.create(
+                model=settings.llm_model,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+                temperature=settings.llm_temperature,
+                max_tokens=settings.max_tokens,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as exc:
+            if "rate_limit_exceeded" in str(exc) and attempt < 3:
+                wait = 5 * (attempt + 1)  # 5s, 10s, 15s
+                logger.warning(f"Groq rate limit — retrying in {wait}s (attempt {attempt + 1}/3)")
+                time.sleep(wait)
+            else:
+                raise
 
 
 # ── Ollama backend (local fallback) ───────────────────────────────────────────
