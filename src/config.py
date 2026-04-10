@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     groq_api_key: str = Field(default="", description="Groq API key")
     llm_model: str = "llama-3.1-8b-instant"
     llm_temperature: float = 0.1
-    max_tokens: int = 1024
+    max_tokens: int = 512
 
     # RAGAS evaluation LLM.
     # llama-3.1-8b-instant: 500k tokens/day free — enough for a full 10-sample run.

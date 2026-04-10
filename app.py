@@ -93,7 +93,9 @@ def ask(question: str) -> tuple[str, str]:
         return "_Please enter a question above._", ""
 
     try:
-        chunks = retrieve(question)
+        # Smaller k values for the Space — reduces Qdrant scan time and
+        # reranker load while preserving answer quality (10+10 → rerank top 5)
+        chunks = retrieve(question, bm25_k=15, vector_k=15, rerank_k=5)
         result = generate_answer(question, chunks)
     except Exception as exc:
         logger.error(f"Pipeline error: {exc}")
