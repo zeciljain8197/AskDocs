@@ -46,6 +46,8 @@ Most RAG demos stop at "retrieve → generate". This project goes further:
   threshold. RAG quality is treated like a test suite, not a vibe check.
 
 **Source code:** [github.com/zeciljain8197/askdocs](https://github.com/zeciljain8197/askdocs)
+
+**Live Space:** [huggingface.co/spaces/zinu07/askdocs](https://huggingface.co/spaces/zinu07/askdocs)
 """
 
 EXAMPLES = [

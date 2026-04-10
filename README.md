@@ -7,7 +7,7 @@
 
 Ask questions about LangChain documentation and get precise, cited answers — not a list of links.
 
-**[Live demo →](https://huggingface.co/spaces/zeciljain8197/askdocs)**
+**[Live demo →](https://huggingface.co/spaces/zinu07/askdocs)**
 
 ---
 
