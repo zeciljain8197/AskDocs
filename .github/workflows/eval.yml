@@ -56,7 +56,14 @@ jobs:
       - name: Run RAG evaluation + quality gate
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python -m src.evaluation.evaluator
+        run: |
+          python -m src.evaluation.evaluator
+          EXIT=$?
+          if [ $EXIT -eq 2 ]; then
+            echo "⚠️  Groq daily token limit exhausted — eval skipped, not a quality failure"
+            exit 0
+          fi
+          exit $EXIT
 
       - name: Upload eval results
         if: always()
